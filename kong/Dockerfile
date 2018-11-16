@@ -1,0 +1,16 @@
+FROM kong:0.14.1
+
+ENV KONG_DATABASE=cassandra
+ENV KONG_CASSANDRA_CONTACT_POINTS=kong-database
+
+ENV KONG_PROXY_ACCESS_LOG /dev/stdout
+ENV KONG_ADMIN_ACCESS_LOG /dev/stdout
+ENV KONG_PROXY_ERROR_LOG /dev/stderr
+ENV KONG_ADMIN_ERROR_LOG /dev/stderr
+
+ENV KONG_ADMIN_LISTEN_SSL 0.0.0.0:8444
+
+EXPOSE 8443
+EXPOSE 8444
+
+CMD ["kong","start", "--run-migrations"]
