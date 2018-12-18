@@ -1,0 +1,3 @@
+[submodule "wahhoi-api"]
+	path = wahhoi-api
+	url = https://github.com/jbgrouposs-cloudnative/wahhoi-api.git
