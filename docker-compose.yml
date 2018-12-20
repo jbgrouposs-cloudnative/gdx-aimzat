@@ -1,19 +1,41 @@
 version: '2.1'
 services:
+
   kong:
     build:
       context: ./kong/
+      args:
+        DB_TYPE: "postgres"
+        DB_NAME: "kong-database"
+        PROXY_PORT: 8080
+        PROXY_PORT_SSL: 8443
+        ADMIN_PORT: 50080
+        ADMIN_PORT_SSL: 50443
     depends_on:
       kong-database:
         condition: service_healthy
-    links:
-      - kong-database:kong-database
-      - wahhoi-api:wahhoi-api
     ports:
-      - "8000:50080"
-      - "8001:50081"
-      - "8443:50443"
-      - "8444:50444"
+      - 8080:8080
+      - 8443:8443
+      - 50080:50080
+      - 50443:50443
+  
+  konga:
+    image: pantsel/konga:latest
+    environment: 
+      PORT: 1337
+      NODE_ENV: development
+      DB_ADAPTER: postgres
+      DB_HOST: kong-database
+      DB_PORT: 5432
+      DB_USER: kong
+      DB_DATABASE: kong
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    ports:
+      - 1337:1337
+
   kong-database:
     image: postgres:9.6
     environment:
@@ -24,6 +46,7 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+
   wahhoi-api:
     build:
       context: ./wahhoi-api/wahhoi-api/
@@ -32,10 +55,10 @@ services:
       - "spring.datasource.username=root"
       - "spring.datasource.password=${MYSQL_ROOT_PASSWORD}"
       - "spring.datasource.driverClassName=com.mysql.jdbc.Driver"
-    ports:
-      - 8080:8080
-    links:
-      - wahhoi-api-database:wahhoi-api-database
+    depends_on: 
+      wahhoi-api-database:
+        condition: service_healthy
+
   wahhoi-api-database:
     build:
       context: ./wahhoi-api/wahhoi-store/
@@ -43,3 +66,8 @@ services:
       - ./wahhoi-api/wahhoi-store/sqls:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
