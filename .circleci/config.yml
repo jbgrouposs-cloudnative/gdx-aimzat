@@ -36,15 +36,15 @@ jobs:
       - attach_workspace:
           at: workspace
       - restore_cache:
-          key: v1-{{ checksum "requirements.txt" }}
+          key: v1-awscli
       - run:
           name: Install awscli
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install awscli
       - save_cache:
-          key: v1-{{ checksum "requirements.txt" }}
+          key: v1-awscli
           paths:
             - "venv"
       - run:
