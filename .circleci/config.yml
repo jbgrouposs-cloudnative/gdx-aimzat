@@ -8,10 +8,6 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Make the executable
-          command: |
-            go build -o demo-app src/main.go
-      - run:
           name: Setup common environment variables
           command: |
             echo 'export ECR_REPOSITORY_NAME="${AWS_RESOURCE_NAME_PREFIX}"' >> $BASH_ENV
@@ -19,7 +15,7 @@ jobs:
       - run:
           name: Build image
           command: |
-            docker build -t $FULL_IMAGE_NAME .
+            docker build -t $FULL_IMAGE_NAME ./kong
       - run:
           name: Save image to an archive
           command: |
@@ -40,15 +36,15 @@ jobs:
       - attach_workspace:
           at: workspace
       - restore_cache:
-          key: v1-{{ checksum "requirements.txt" }}
+          key: v1-awscli
       - run:
           name: Install awscli
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install awscli
       - save_cache:
-          key: v1-{{ checksum "requirements.txt" }}
+          key: v1-awscli
           paths:
             - "venv"
       - run:
@@ -78,4 +74,6 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - circleci
