@@ -84,6 +84,14 @@ spec:
     port: 443
     targetPort: 8443
     protocol: TCP
+  - name: kong-proxy-admin
+    port: 50080
+    targetPort: 8001
+    protocol: TCP
+  - name: kong-proxy-admin-ssl
+    port: 50443
+    targetPort: 8444
+    protocol: TCP
   selector:
     app: kong
 ---
@@ -136,7 +144,7 @@ spec:
         - name: KONG_PROXY_ERROR_LOG
           value: "/dev/stderr"
         - name: KONG_ADMIN_LISTEN
-          value: 'off'
+          value: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
         ports:
         - name: proxy
           containerPort: 8000
@@ -144,6 +152,13 @@ spec:
         - name: proxy-ssl
           containerPort: 8443
           protocol: TCP
+        - name: proxy-admin
+          containerPort: 8001
+          protocol: TCP
+        - name: proxy-admin-ssl
+          containerPort: 8444
+          protocol: TCP
+
 
 ---
 apiVersion: batch/v1
